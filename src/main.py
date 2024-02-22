@@ -1,17 +1,16 @@
-
-# Importando as bibliotecas
+# Importando bibliotecas
 from serial.tools import list_ports
+import time
 import inquirer
-import pydobot
 from yaspin import yaspin
 
-# Declarando o spinner do yaspin
+# Declarando o spinner
 spinner = yaspin(text="Movimentando...", color="yellow")
 
-# Variável para guardar as portas disponíveis
+# Variavel para guardar as portas disponiveis
 available_ports = list_ports.comports()
 
-# Função para adquirir a porta serial e retornar a escolhida
+# Adquirir a porta serial escolhida
 def get_port():
     porta_escolhida = inquirer.prompt([
         inquirer.List("porta", message="Escolha a porta serial", choices=[x.device for x in available_ports])
@@ -19,46 +18,64 @@ def get_port():
     print(f"Porta escolhida: {porta_escolhida}")
     return porta_escolhida
 
-# Função para o robo voltar a home
+# Função para robo voltar para a posição inicial
 def go_home():
-    print("Voltando para a posição home...")
+    print("Voltando para posição inicial...")
+    spinner.start()
+    #robo.home()
+    spinner.stop()
 
-# Função para ligar o atuador
+# Função para ligar o atuador do robo
 def turn_actuator_on():
     print("Ligando o atuador...")
+    spinner.start()
+    #robo.suck(True)
+    #robo.wait(200)
+    spinner.stop()
+    
 
-# Função para desligar o atuador
+# Função para desligar o atuador do robo
 def turn_actuator_off():
     print("Desligando o atuador...")
+    spinner.start()
+    #robo.suck(False)
+    #robo.wait(200)
+    spinner.stop()
 
-# Função para mover o robo para a respectiva posição
+# Função para mover o robo para uma posição
 def move(x, y, z, r):
-    # Iniciar o spinner
     spinner.start()
     print(f"Se movendo para a posição: ({x}, {y}, {z}), rotação: {r}")
-    # Parar de mover o spinner quando o robo chegar ao local
+    #robo.move_to(x, y, z, r, wait=True)
     spinner.stop()
+    print(f"Movimento para a posição: ({x}, {y}, {z}), rotação: {r} concluído!")
+    time.sleep(2)  
 
 # Função para pegar a posição atual do robo
 def position():
     print("Posição atual: ...")
+    spinner.start()
+    #posicao = robo.pose()
+    #print(f"Current Pose: X: {current_pose[0]}, Y: {current_pose[1]}, Z: {current_pose[2]}, Rotation: {current_pose[3]}")
+    spinner.stop()
 
-# Dicionário para guardar as funções de cada ação
+# Dicíonario de funções para as ações do robo
 action_functions = {
     "Home": go_home,
     "Ligar atuador": turn_actuator_on,
     "Desligar atuador": turn_actuator_off,
     "Mover": move,
-    "Posição atual": position
+    "Posição atual": position,
+    "Sair": exit
 }
 
-# Função para o input dos parametros caso a ação selecionada foi a de mover o robo
+# Função para pegar os parametros de movimento do robo
 def get_move_params():
     questions = [
-        inquirer.Text("x", message="Digite X"),
-        inquirer.Text("y", message="Digite Y"),
-        inquirer.Text("z", message="Digite Z"),
-        inquirer.Text("r", message="Digite R")
+        inquirer.Text("x", message="Enter X"),
+        inquirer.Text("y", message="Enter Y"),
+        inquirer.Text("z", message="Enter Z"),
+        inquirer.Text("r", message="Enter R")
     ]
     answers = inquirer.prompt(questions)
     x = float(answers["x"])
@@ -67,11 +84,10 @@ def get_move_params():
     r = float(answers["r"])
     return x, y, z, r
 
-# Função para pegar a ação que o usuário deseja realizar
+# Função para pegar a ação escolhida
 def get_action():
-    # Prompt do inquirer
     action = inquirer.prompt([
-        inquirer.List("act", message="Escolha a ação a ser executada", choices=["Home", "Ligar atuador", "Desligar atuador", "Mover", "Posição atual"])
+        inquirer.List("act", message="Escolha a ação", choices=["Home", "Ligar atuador", "Desligar atuador", "Mover", "Posição atual", "Sair"])
     ])
     action_name = action["act"]
     if action_name == "Mover":
@@ -79,18 +95,21 @@ def get_action():
     else:
         return action_name, None
 
-# Adicionar a porta ao robo
+# Adquirir a porta serial escolhida
 port = get_port()
-# robo = pydobot.Dobot(port=port, verbose=False)
 
-# Se a ação não existir
-chosen_action, action_params = get_action()
-if chosen_action in action_functions:
-    if action_params:
-        action_functions[chosen_action](*action_params)
+#robo = pydobot.Dobot(port=port, verbose=False)
+#robo.speed(30, 30)
+
+# Loop para pegar as ações escolhidas
+while True:
+    chosen_action, action_params = get_action()
+    if chosen_action in action_functions:
+        if chosen_action == "Sair":
+            break
+        elif action_params:
+            action_functions[chosen_action](*action_params)
+        else:
+            action_functions[chosen_action]()
     else:
-        action_functions[chosen_action]()
-else:
-    print("Ação inválida")
-
-# robo.close()
+        print("Ação inválida")
