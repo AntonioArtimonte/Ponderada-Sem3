@@ -2,6 +2,7 @@
 from serial.tools import list_ports
 import time
 import inquirer
+import pydobot
 from yaspin import yaspin
 
 # Declarando o spinner
@@ -22,15 +23,15 @@ def get_port():
 def go_home():
     print("Voltando para posição inicial...")
     spinner.start()
-    #robo.home()
+    robo.move_to(240, 0, 150, 0, wait=True)
     spinner.stop()
 
 # Função para ligar o atuador do robo
 def turn_actuator_on():
     print("Ligando o atuador...")
     spinner.start()
-    #robo.suck(True)
-    #robo.wait(200)
+    robo.suck(True)
+    robo.wait(200)
     spinner.stop()
     
 
@@ -38,26 +39,23 @@ def turn_actuator_on():
 def turn_actuator_off():
     print("Desligando o atuador...")
     spinner.start()
-    #robo.suck(False)
-    #robo.wait(200)
+    robo.suck(False)
+    robo.wait(200)
     spinner.stop()
 
 # Função para mover o robo para uma posição
 def move(x, y, z, r):
     spinner.start()
     print(f"Se movendo para a posição: ({x}, {y}, {z}), rotação: {r}")
-    #robo.move_to(x, y, z, r, wait=True)
+    robo.move_to(x, y, z, r, wait=True)
     spinner.stop()
     print(f"Movimento para a posição: ({x}, {y}, {z}), rotação: {r} concluído!")
-    time.sleep(2)  
 
 # Função para pegar a posição atual do robo
 def position():
     print("Posição atual: ...")
-    spinner.start()
-    #posicao = robo.pose()
-    #print(f"Current Pose: X: {current_pose[0]}, Y: {current_pose[1]}, Z: {current_pose[2]}, Rotation: {current_pose[3]}")
-    spinner.stop()
+    current_pose = robo.pose()
+    print(f"Posição atual: X: {current_pose[0]}, Y: {current_pose[1]}, Z: {current_pose[2]}, Rotação: {current_pose[3]}")
 
 # Dicíonario de funções para as ações do robo
 action_functions = {
@@ -98,8 +96,8 @@ def get_action():
 # Adquirir a porta serial escolhida
 port = get_port()
 
-#robo = pydobot.Dobot(port=port, verbose=False)
-#robo.speed(30, 30)
+robo = pydobot.Dobot(port=port, verbose=False)
+robo.speed(30, 30)
 
 # Loop para pegar as ações escolhidas
 while True:
