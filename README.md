@@ -19,6 +19,9 @@ Este repositório contém o código relacionado à programação de um robô, ju
 ### Observacão
 - Como orientado em sala, segue aqui, a função "move" do robo move o mesmo em todos os eixos de uma só vez, ou seja, caso deseje manter o mesmo y e z e apenas mudar x e r, basta colocar no em y e z os valores atuais do robo
 
+### Vídeo demonstração
+
+Segue no link a seguir um video de demonstração do robô, como requisitado na tarefa; https://drive.google.com/file/d/1lvChuA-N5-B2b-_QT6UehtpLPf51XCIj/view?usp=sharing
 
 ## Autor
 
