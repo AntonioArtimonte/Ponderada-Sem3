@@ -17,6 +17,7 @@ class InteliArm(pydobot.Dobot):
 
         
 
+
 # Declarando o spinner
 spinner = yaspin(text="Movimentando...", color="yellow")
 
@@ -63,11 +64,29 @@ def move(x, y, z, r):
     spinner.stop()
     print(f"Movimento para a posição: ({x}, {y}, {z}), rotação: {r} concluído!")
 
+# Função para mover o robo em apenas um eixo
+def move_axis(axis, value):
+    pos = robo.pose()
+    spinner.start()
+    print(f"Se movendo no eixo {axis} para a posição: {value}")
+    if axis == "X":
+        print(pos[0] + value, pos[1], pos[2], pos[3])
+        robo.move_to(pos[0] + value, pos[1], pos[2], pos[3], wait=True)
+    elif axis == "Y":
+        robo.move_to(pos[0], pos[1] + value, pos[2], pos[3], wait=True)
+    elif axis == "Z":
+        robo.move_to(pos[0], pos[1], pos[2] + value, pos[3], wait=True)
+    elif axis == "R":
+        robo.move_to(pos[0], pos[1], pos[2], pos[3] + value, wait=True)
+    spinner.stop()
+    print(f"Movimento no eixo {axis} para a posição: {value} concluído!")
+
 # Função para pegar a posição atual do robo
 def position():
     print("Posição atual: ...")
     current_pose = robo.pose()
     print(f"Posição atual: X: {current_pose[0]}, Y: {current_pose[1]}, Z: {current_pose[2]}, Rotação: {current_pose[3]}")
+    return current_pose
 
 # Dicíonario de funções para as ações do robo
 action_functions = {
@@ -75,6 +94,7 @@ action_functions = {
     "Ligar atuador": turn_actuator_on,
     "Desligar atuador": turn_actuator_off,
     "Mover": move,
+    "Mover em um eixo": move_axis,
     "Posição atual": position,
     "Sair": exit
 }
@@ -97,11 +117,17 @@ def get_move_params():
 # Função para pegar a ação escolhida
 def get_action():
     action = inquirer.prompt([
-        inquirer.List("act", message="Escolha a ação", choices=["Home", "Ligar atuador", "Desligar atuador", "Mover", "Posição atual", "Sair"])
+        inquirer.List("act", message="Escolha a ação", choices=["Home", "Ligar atuador", "Desligar atuador", "Mover", "Mover em um eixo" , "Posição atual", "Sair"])
     ])
     action_name = action["act"]
     if action_name == "Mover":
         return action_name, get_move_params()
+    elif action_name == "Mover em um eixo":
+        axis = inquirer.prompt([
+            inquirer.List("axis", message="Escolha o eixo", choices=["X", "Y", "Z", "R"])
+        ])["axis"]
+        value = float(input(f"Digite o valor para o eixo {axis}: "))
+        return action_name, (axis, value)
     else:
         return action_name, None
 
@@ -109,7 +135,7 @@ def get_action():
 port = get_port()
 
 robo = InteliArm(port=port, verbose=False)
-robo.speed(30, 30)
+robo.speed(200, 200)
 
 # Loop para pegar as ações escolhidas
 while True:
@@ -124,4 +150,4 @@ while True:
             action_functions[chosen_action]()
     else:
         print("Ação inválida")
-
+        
